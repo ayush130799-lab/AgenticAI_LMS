@@ -1,0 +1,11 @@
+# ai_engine-specific dependencies not already in backend/requirements.txt.
+# langchain, langchain-anthropic, langchain-core, langgraph, anthropic,
+# pgvector, and tenacity are already provided by backend/requirements.txt
+# and satisfy every *required* import in this package.
+#
+# voyageai is optional: it is only imported (lazily) by
+# ai_engine/rag/embedder.py when EMBEDDING_API_KEY or VOYAGE_API_KEY is set,
+# to compute real embeddings. Without it (or without a key configured),
+# embed_text() transparently falls back to its deterministic pseudo-embedding
+# and the whole RAG pipeline still works offline.
+voyageai>=0.2.0

@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: agentic_lms_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lms_user
+      POSTGRES_PASSWORD: lms_password
+      POSTGRES_DB: agentic_ai_lms
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms_user -d agentic_ai_lms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: agentic_lms_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://lms_user:lms_password@postgres:5432/agentic_ai_lms
+      DATABASE_URL_SYNC: postgresql+psycopg://lms_user:lms_password@postgres:5432/agentic_ai_lms
+      VECTOR_DATABASE_URL: postgresql+psycopg://lms_user:lms_password@postgres:5432/agentic_ai_lms
+      # Student code is graded in the isolated code_runner service, never inside the backend.
+      CODE_RUNNER_URL: http://code_runner:9000
+      CODE_RUNNER_TOKEN: ${CODE_RUNNER_TOKEN:-dev-runner-token-change-me}
+    networks:
+      - default
+      - sandbox
+    depends_on:
+      postgres:
+        condition: service_healthy
+      code_runner:
+        condition: service_started
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend:/app
+      - ./ai_engine:/ai_engine
+      - ./content:/content
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.db.seed_runner &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: agentic_lms_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8001/api
+      # Docker Desktop bind mounts on Windows/macOS don't deliver file-change events to the
+      # container, so without polling Next serves stale copies of edited files.
+      WATCHPACK_POLLING: "true"
+    depends_on:
+      - backend
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    command: sh -c "npm install && npm run dev"
+
+  # Sandbox that executes student code for coding questions. It has NO internet access (internal network,
+  # reachable only by the backend), a read-only filesystem, no capabilities, and hard CPU/memory/pid caps.
+  code_runner:
+    build:
+      context: ./code_runner
+    container_name: agentic_lms_code_runner
+    restart: unless-stopped
+    environment:
+      RUNNER_TOKEN: ${CODE_RUNNER_TOKEN:-dev-runner-token-change-me}
+    networks:
+      - sandbox
+    init: true  # tini as PID 1 reaps the orphans/zombies a fork bomb leaves behind
+    read_only: true
+    tmpfs:
+      - /tmp:rw,size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 768m
+    cpus: 1.5
+
+networks:
+  sandbox:
+    internal: true
+
+volumes:
+  pgdata:

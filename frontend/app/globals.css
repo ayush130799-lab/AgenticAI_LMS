@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-page text-ink-700 antialiased;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink-900 font-bold tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-brand-cyan/20;
+  }
+}
+
+@layer components {
+  .container-lms {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .prose-lesson {
+    @apply max-w-none text-ink-700;
+  }
+
+  .prose-lesson h1 {
+    @apply text-2xl mb-4 mt-8;
+  }
+
+  .prose-lesson h2 {
+    @apply text-xl mb-3 mt-8;
+  }
+
+  .prose-lesson h3 {
+    @apply text-lg mb-2 mt-6;
+  }
+
+  .prose-lesson p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .prose-lesson ul {
+    @apply list-disc pl-6 mb-4 space-y-1;
+  }
+
+  .prose-lesson ol {
+    @apply list-decimal pl-6 mb-4 space-y-1;
+  }
+
+  .prose-lesson pre {
+    @apply bg-ink-900 text-ink-100 rounded-xl p-4 overflow-x-auto mb-4 text-sm;
+  }
+
+  .prose-lesson code {
+    @apply bg-ink-100 text-brand-blue-dark rounded px-1.5 py-0.5 text-sm;
+  }
+
+  .prose-lesson pre code {
+    @apply bg-transparent text-inherit p-0;
+  }
+
+  .prose-lesson a {
+    @apply text-brand-blue underline underline-offset-2;
+  }
+
+  .prose-lesson blockquote {
+    @apply border-l-4 border-brand-cyan pl-4 italic text-ink-500 mb-4;
+  }
+}
