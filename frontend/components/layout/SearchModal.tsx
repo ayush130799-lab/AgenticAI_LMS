@@ -97,7 +97,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
 
           {!loading && query.trim().length >= 2 && results.length === 0 && (
             <p className="p-6 text-center text-xs text-slate-400">
-              No courses, lessons, or skills found matching "{query}".
+              No courses, lessons, or skills found matching &quot;{query}&quot;.
             </p>
           )}
 

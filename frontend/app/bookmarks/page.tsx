@@ -71,7 +71,7 @@ function BookmarksContent() {
           </div>
           <h3 className="mt-4 text-base font-bold text-slate-900">No bookmarks saved yet</h3>
           <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
-            Click the "☆ Bookmark" button in the upper right header while reading any lesson to save it here.
+            Click the &quot;☆ Bookmark&quot; button in the upper right header while reading any lesson to save it here.
           </p>
           <div className="mt-6">
             <Button href="/courses" size="sm">
